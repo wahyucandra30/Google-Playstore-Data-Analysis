@@ -1,0 +1,73 @@
+---
+title: "Google Playstore Data Analysis"
+author: "Wahyu & Suryo"
+date: "12/20/2020"
+output: html_document
+---
+
+# Analisis Data Google Playstore
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+# Pengantar
+## Data yang digunakan
+Dataset yang digunakan diambil dari: https://www.kaggle.com/ujjwalprakash/playstore
+
+Dataset tersebut berisi daftar aplikasi pada Google Playstore beserta rinciannya.
+Kolom-kolom pada dataset meliputi:
+
+* **App**: Nama aplikasi
+* **Category**: Kategori aplikasi
+* **Rating**: Penilaian aplikasi (bintang 1 sampai 5)
+* **Reviews**: Jumlah user reviews
+* **Size**: Ukuran download (dalam Kilobyte)
+* **Installs**: Jumlah installasi
+* **Type**: Tipe pembayaran aplikasi (free atau paid)
+* **Content Rating**: Penilaian kecocokan kedewasaan pengguna aplikasi
+
+Ditambah 3 kolom yang tidak kami gunakan
+
+* **Last Updated**: Tanggal update terakhir
+* **Current Ver**: Versi aplikasi
+* **Android ver**: Versi android
+
+## Tujuan analisis
+Melihat banyaknya aplikasi yang ada di Google Playstore, kami ingin mengeksplorasi
+faktor-faktor yang memengaruhi popularitas aplikasi dari segi rating,
+Kemudian melakukan prediksi apakah aplikasi akan mendapatkan rating yang baik.
+
+# Persiapan R
+## Import libraries
+```{r message=FALSE, warning=FALSE}
+library(datasets)
+library(DT)
+library(dplyr)
+library(tidyr)
+library(factoextra)
+library(NbClust)
+library(fpc)
+library(dbscan)
+```
+
+# Analisis data
+## Import data
+```{r}
+gpData <- read.csv("playstore_analysis.csv")
+```
+
+## Memasukkan data ke data frame
+```{r}
+df <- data.frame(gpData[1:10])
+```
+
+Data frame tersebut tidak meliputi 3 kolom terakhir karena kami rasa tidak relevan.
+
+## Tampilan data sekilas
+```{r}
+datatable(head(df), options = list(autoWidth=FALSE, scrollX=300, searching=FALSE, paging=FALSE, info=FALSE))
+```
+
+Menampilkan beberapa baris menggunakan datatable dari library DT
