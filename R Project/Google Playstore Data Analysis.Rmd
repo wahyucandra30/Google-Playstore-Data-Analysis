@@ -13,10 +13,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 # Pengantar
-## Data yang digunakan
+### Data yang digunakan
 Dataset yang digunakan diambil dari: https://www.kaggle.com/ujjwalprakash/playstore
 
 Dataset tersebut berisi daftar aplikasi pada Google Playstore beserta rinciannya.
+Terdapat total **10.841 baris** dan **13 kolom**.
+
 Kolom-kolom pada dataset meliputi:
 
 * **App**: Nama aplikasi
@@ -34,13 +36,13 @@ Ditambah 3 kolom yang tidak kami gunakan
 * **Current Ver**: Versi aplikasi
 * **Android ver**: Versi android
 
-## Tujuan analisis
+### Tujuan analisis
 Melihat banyaknya aplikasi yang ada di Google Playstore, kami ingin mengeksplorasi
 faktor-faktor yang memengaruhi popularitas aplikasi dari segi rating,
 Kemudian melakukan prediksi apakah aplikasi akan mendapatkan rating yang baik.
 
 # Persiapan R
-## Import libraries
+### Import libraries
 ```{r message=FALSE, warning=FALSE}
 library(datasets)
 library(DT)
@@ -52,22 +54,31 @@ library(fpc)
 library(dbscan)
 ```
 
-# Analisis data
-## Import data
+# Gambaran umum dataset
+Import dataset lalu simpan ke data frame.
 ```{r}
 gpData <- read.csv("playstore_analysis.csv")
-```
-
-## Memasukkan data ke data frame
-```{r}
 df <- data.frame(gpData[1:10])
 ```
 
-Data frame tersebut tidak meliputi 3 kolom terakhir karena kami rasa tidak relevan.
-
-## Tampilan data sekilas
+<center>*Data frame diatas tidak meliputi 3 kolom terakhir karena kami rasa tidak relevan.*<br><br></center>
+Data kemudian dapat kita tampilkan dalam bentuk tabel. Di sini kami menggunakan datatable dari library DT agar tabel terlihat lebih rapi. Berikut tampilan sekilas beberapa baris data tersebut:
 ```{r}
-datatable(head(df), options = list(autoWidth=FALSE, scrollX=300, searching=FALSE, paging=FALSE, info=FALSE))
+datatable(head(df), options = list(autoWidth=TRUE, scrollX=300, searching=FALSE, paging=FALSE, info=FALSE))
 ```
 
-Menampilkan beberapa baris menggunakan datatable dari library DT
+Dari data tersebut dapat kita lihat ringkasan kolom-kolom seperti berikut:
+```{r}
+summary(df)
+```
+
+### Visualisasi data
+Di sini kami memvisualisasikan sebaran data rating aplikasi dengan menggunakan histogram dan density curve dari library ggplot2.
+```{r message=FALSE, warning=FALSE}
+ggplot(df, aes(x = Rating)) +
+  geom_histogram(aes(y = ..density..),
+                 binwidth = .5, colour = "white ", fill="lightblue") +
+  geom_density(alpha = .1, colour = "darkgreen",fill="green")
+```
+
+Terlihat sebaran data condong ke kiri dengan konsentrasi sebaran terpadat di tengah yang berarti lebih sedikit jumlah rating buruk.
