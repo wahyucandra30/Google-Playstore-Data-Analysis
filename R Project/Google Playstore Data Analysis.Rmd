@@ -96,14 +96,9 @@ df[c("Popularity")] <- gsub('[+, ,]','',df$Popularity)
 unique(df$Popularity)
 ```
 
-Kemudian kami lakukan konversi ke numerik sebagai berikut:
-```{r include=FALSE}
-transform(df, Popularity = as.integer(Popularity))
-```
-
 Lalu menggunakan fungsi **ifelse** untuk merubah data menjadi **1** jika data awal lebih dari atau sama dengan **50.000**, dan **0** jika tidak.
 ```{r}
-df[c("Popularity")] <- ifelse(df$Popularity >= "50000", 1, 0)
+df[c("Popularity")] <- ifelse(as.numeric(df$Popularity) >= as.numeric(50000), 1, 0)
 datatable(df[c("Installs", "Popularity")], options = list(searching=FALSE, info=FALSE))
 ```
 
