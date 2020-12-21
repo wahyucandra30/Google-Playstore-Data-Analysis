@@ -43,7 +43,6 @@ faktor-faktor yang memiliki pengaruh paling besar bagi popularitas suatu aplikas
 # Persiapan R
 ### Import libraries
 ```{r message=FALSE, warning=FALSE}
-library(dplyr)
 library(tidyr)
 library(factoextra)
 library(NbClust)
@@ -84,24 +83,31 @@ Bagaimana indikasi suatu aplikasi diaggap populer berdasarkan jumlah installasi?
 unique(df$Installs)
 ```
 
-Untuk memulai proses binerisasi kolom installs, perlu dilakukan konversi data installs dari char ke numerik. Pertama, kami hapus tanda **+** dan **,** untuk memudahkan konversi ke numerik.
-```{r}
-df[c("Installs")] <- gsub('[+, ,]','',df$Installs)
-unique(df$Installs)
+Kami lakukan proses ini di kolom baru bernama **Popularity**. Berikut proses duplikasi kolom **Installs** ke kolom **popularity** menggunakan fungsi **mutate** pada **dplyr**:
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+df <- df %>% mutate(Popularity = Installs)
 ```
 
-```{r}
-#df[c("Installs")] <- as.numeric(df[c("Installs")])
-#df[c("Installs")] <- ifelse(df[c("Installs")] > 50000, 1, 0)
-```
+Untuk memulai proses binerisasi, perlu dilakukan konversi data dari char ke numerik. Pertama, kami hapus tanda **+** dan **,** untuk memudahkan konversi ke numerik.
 
 ```{r}
-#set.seed(666) # Menyimpan seed agar sample dapat dibuat ulang.
-# Now Selecting 75% of data as sample from total 'n' rows of the data  
-#sample <- sample.int(n = nrow(data), size = floor(.75*nrow(data)), replace = F)
-#train <- data[sample, ]
-#test  <- data[-sample, ]
+df[c("Popularity")] <- gsub('[+, ,]','',df$Popularity)
+unique(df$Popularity)
 ```
+
+Kemudian kami lakukan konversi ke numerik sebagai berikut:
+```{r include=FALSE}
+transform(df, Popularity = as.integer(Popularity))
+```
+
+Lalu menggunakan fungsi **ifelse** untuk merubah data menjadi **1** jika data awal lebih dari atau sama dengan **50.000**, dan **0** jika tidak.
+```{r}
+df[c("Popularity")] <- ifelse(df$Popularity >= "50000", 1, 0)
+datatable(df[c("Installs", "Popularity")], options = list(searching=FALSE, info=FALSE))
+```
+
+
 ### Visualisasi data
 Di sini kami memvisualisasikan sebaran data rating aplikasi dengan menggunakan histogram dan density curve dari library ggplot2.
 ```{r message=FALSE, warning=FALSE}
