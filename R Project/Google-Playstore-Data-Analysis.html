@@ -2955,16 +2955,14 @@ summary {
 </div>
 <div id="tujuan-analisis" class="section level3">
 <h3>Tujuan analisis</h3>
-<p>Melihat banyaknya aplikasi yang ada di Google Playstore, kami ingin mengeksplorasi faktor-faktor yang memengaruhi popularitas aplikasi dari segi rating, Kemudian melakukan prediksi apakah aplikasi akan mendapatkan rating yang baik.</p>
+<p>Melihat banyaknya aplikasi yang ada di Google Playstore, kami ingin mengeksplorasi faktor-faktor yang memiliki pengaruh paling besar bagi popularitas suatu aplikasi dari segi jumlah installasi menggunakan machine learning.</p>
 </div>
 </div>
 <div id="persiapan-r" class="section level1">
 <h1>Persiapan R</h1>
 <div id="import-libraries" class="section level3">
 <h3>Import libraries</h3>
-<pre class="r"><code>library(datasets)
-library(DT)
-library(dplyr)
+<pre class="r"><code>library(dplyr)
 library(tidyr)
 library(factoextra)
 library(NbClust)
@@ -2980,10 +2978,12 @@ df &lt;- data.frame(gpData[1:10])</code></pre>
 <center>
 <em>Data frame diatas tidak meliputi 3 kolom terakhir karena kami rasa tidak relevan.</em><br><br>
 </center>
-<p>Data kemudian dapat kita tampilkan dalam bentuk tabel. Di sini kami menggunakan datatable dari library DT agar tabel terlihat lebih rapi. Berikut tampilan sekilas beberapa baris data tersebut:</p>
+<p>Untuk selanjutnya akan terus menggunakan data frame. Data kemudian dapat kita tampilkan dalam bentuk tabel. Di sini kami menggunakan datatable dari library DT agar tabel terlihat lebih rapi. Berikut tampilan sekilas beberapa baris data tersebut:</p>
+<pre class="r"><code>library(DT)</code></pre>
+<pre><code>## Warning: package &#39;DT&#39; was built under R version 4.0.3</code></pre>
 <pre class="r"><code>datatable(head(df), options = list(autoWidth=TRUE, scrollX=300, searching=FALSE, paging=FALSE, info=FALSE))</code></pre>
-<div id="htmlwidget-31f47123951e8a9e4ca0" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-31f47123951e8a9e4ca0">{"x":{"filter":"none","data":[["1","2","3","4","5","6"],["Photo Editor &amp; Candy Camera &amp; Grid &amp; ScrapBook","Coloring book moana","U Launcher Lite â€“ FREE Live Cool Themes, Hide Apps","Sketch - Draw &amp; Paint","Pixel Draw - Number Art Coloring Book","Paper flowers instructions"],["ART_AND_DESIGN","ART_AND_DESIGN","ART_AND_DESIGN","ART_AND_DESIGN","ART_AND_DESIGN","ART_AND_DESIGN"],[4.1,3.9,4.7,4.5,4.3,4.4],[159,967,87510,215644,967,167],[19000,14000,8700,25000,2800,5600],["10,000+","500,000+","5,000,000+","50,000,000+","100,000+","50,000+"],["Free","Free","Free","Free","Free","Free"],["0","0","0","0","0","0"],["Everyone","Everyone","Everyone","Teen","Everyone","Everyone"],["Art &amp; Design","Art &amp; Design;Pretend Play","Art &amp; Design","Art &amp; Design","Art &amp; Design;Creativity","Art &amp; Design"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>App<\/th>\n      <th>Category<\/th>\n      <th>Rating<\/th>\n      <th>Reviews<\/th>\n      <th>Size<\/th>\n      <th>Installs<\/th>\n      <th>Type<\/th>\n      <th>Price<\/th>\n      <th>Content.Rating<\/th>\n      <th>Genres<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"autoWidth":true,"scrollX":300,"searching":false,"paging":false,"info":false,"columnDefs":[{"className":"dt-right","targets":[3,4,5]},{"orderable":false,"targets":0}],"order":[],"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-33489cc6578283c17a47" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-33489cc6578283c17a47">{"x":{"filter":"none","data":[["1","2","3","4","5","6"],["Photo Editor &amp; Candy Camera &amp; Grid &amp; ScrapBook","Coloring book moana","U Launcher Lite â€“ FREE Live Cool Themes, Hide Apps","Sketch - Draw &amp; Paint","Pixel Draw - Number Art Coloring Book","Paper flowers instructions"],["ART_AND_DESIGN","ART_AND_DESIGN","ART_AND_DESIGN","ART_AND_DESIGN","ART_AND_DESIGN","ART_AND_DESIGN"],[4.1,3.9,4.7,4.5,4.3,4.4],[159,967,87510,215644,967,167],[19000,14000,8700,25000,2800,5600],["10,000+","500,000+","5,000,000+","50,000,000+","100,000+","50,000+"],["Free","Free","Free","Free","Free","Free"],["0","0","0","0","0","0"],["Everyone","Everyone","Everyone","Teen","Everyone","Everyone"],["Art &amp; Design","Art &amp; Design;Pretend Play","Art &amp; Design","Art &amp; Design","Art &amp; Design;Creativity","Art &amp; Design"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>App<\/th>\n      <th>Category<\/th>\n      <th>Rating<\/th>\n      <th>Reviews<\/th>\n      <th>Size<\/th>\n      <th>Installs<\/th>\n      <th>Type<\/th>\n      <th>Price<\/th>\n      <th>Content.Rating<\/th>\n      <th>Genres<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"autoWidth":true,"scrollX":300,"searching":false,"paging":false,"info":false,"columnDefs":[{"className":"dt-right","targets":[3,4,5]},{"orderable":false,"targets":0}],"order":[],"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <p>Dari data tersebut dapat kita lihat ringkasan kolom-kolom seperti berikut:</p>
 <pre class="r"><code>summary(df)</code></pre>
 <pre><code>##      App              Category             Rating         Reviews        
@@ -3010,10 +3010,59 @@ df &lt;- data.frame(gpData[1:10])</code></pre>
 ##                                       
 ##                                       
 ## </code></pre>
+</div>
+<div id="preprocessing" class="section level1">
+<h1>Preprocessing</h1>
+<p>Pada kolom rating terdapat <strong>1474</strong> data yang hilang/kosong. Data kosong seperti ini dapat memengaruhi akurasi model sehingga kami memutuskan untuk menghapus baris yang mengandung data kosong.</p>
+<pre class="r"><code>df &lt;- na.omit(df)
+summary(df)</code></pre>
+<pre><code>##      App              Category             Rating         Reviews        
+##  Length:9366        Length:9366        Min.   :1.000   Min.   :       1  
+##  Class :character   Class :character   1st Qu.:4.000   1st Qu.:     186  
+##  Mode  :character   Mode  :character   Median :4.300   Median :    5930  
+##                                        Mean   :4.192   Mean   :  514050  
+##                                        3rd Qu.:4.500   3rd Qu.:   81533  
+##                                        Max.   :5.000   Max.   :78158306  
+##       Size            Installs             Type              Price          
+##  Min.   :     8.5   Length:9366        Length:9366        Length:9366       
+##  1st Qu.:  6600.0   Class :character   Class :character   Class :character  
+##  Median : 21000.0   Mode  :character   Mode  :character   Mode  :character  
+##  Mean   : 22705.7                                                           
+##  3rd Qu.: 27000.0                                                           
+##  Max.   :100000.0                                                           
+##  Content.Rating        Genres         
+##  Length:9366        Length:9366       
+##  Class :character   Class :character  
+##  Mode  :character   Mode  :character  
+##                                       
+##                                       
+## </code></pre>
+<p>Bagaimana indikasi suatu aplikasi diaggap populer berdasarkan jumlah installasi? Kami menyetujui bahwa aplikasi dengan jumlah installasi di atas <strong>50.000</strong> dapat dianggap populer. Dengan demikian, data installasi akan kami transformasi menjadi bersifat biner; antara populer(di atas 50.000 instalasi) dan tidak populer(di bawah 50.000 instalasi) dengan 1 merepresentasikan populer dan 0 merepresentasikan tidak populer. Berikut tampilan setiap nilai unik pada kolom installs:</p>
+<pre class="r"><code>unique(df$Installs)</code></pre>
+<pre><code>##  [1] &quot;10,000+&quot;        &quot;500,000+&quot;       &quot;5,000,000+&quot;     &quot;50,000,000+&quot;   
+##  [5] &quot;100,000+&quot;       &quot;50,000+&quot;        &quot;1,000,000+&quot;     &quot;10,000,000+&quot;   
+##  [9] &quot;5,000+&quot;         &quot;100,000,000+&quot;   &quot;1,000,000,000+&quot; &quot;1,000+&quot;        
+## [13] &quot;500,000,000+&quot;   &quot;100+&quot;           &quot;500+&quot;           &quot;10+&quot;           
+## [17] &quot;5+&quot;             &quot;50+&quot;            &quot;1+&quot;</code></pre>
+<p>Untuk memulai proses binerisasi kolom installs, perlu dilakukan konversi data installs dari char ke numerik. Pertama, kami hapus tanda <strong>+</strong> dan <strong>,</strong> untuk memudahkan konversi ke numerik.</p>
+<pre class="r"><code>df[c(&quot;Installs&quot;)] &lt;- gsub(&#39;[+, ,]&#39;,&#39;&#39;,df$Installs)
+unique(df$Installs)</code></pre>
+<pre><code>##  [1] &quot;10000&quot;      &quot;500000&quot;     &quot;5000000&quot;    &quot;50000000&quot;   &quot;100000&quot;    
+##  [6] &quot;50000&quot;      &quot;1000000&quot;    &quot;10000000&quot;   &quot;5000&quot;       &quot;100000000&quot; 
+## [11] &quot;1000000000&quot; &quot;1000&quot;       &quot;500000000&quot;  &quot;100&quot;        &quot;500&quot;       
+## [16] &quot;10&quot;         &quot;5&quot;          &quot;50&quot;         &quot;1&quot;</code></pre>
+<pre class="r"><code>#df[c(&quot;Installs&quot;)] &lt;- as.numeric(df[c(&quot;Installs&quot;)])
+#df[c(&quot;Installs&quot;)] &lt;- ifelse(df[c(&quot;Installs&quot;)] &gt; 50000, 1, 0)</code></pre>
+<pre class="r"><code>#set.seed(666) # Menyimpan seed agar sample dapat dibuat ulang.
+# Now Selecting 75% of data as sample from total &#39;n&#39; rows of the data  
+#sample &lt;- sample.int(n = nrow(data), size = floor(.75*nrow(data)), replace = F)
+#train &lt;- data[sample, ]
+#test  &lt;- data[-sample, ]</code></pre>
 <div id="visualisasi-data" class="section level3">
 <h3>Visualisasi data</h3>
 <p>Di sini kami memvisualisasikan sebaran data rating aplikasi dengan menggunakan histogram dan density curve dari library ggplot2.</p>
-<pre class="r"><code>ggplot(df, aes(x = Rating)) +
+<pre class="r"><code>library(ggplot2)
+ggplot(df, aes(x = Rating)) +
   geom_histogram(aes(y = ..density..),
                  binwidth = .5, colour = &quot;white &quot;, fill=&quot;lightblue&quot;) +
   geom_density(alpha = .1, colour = &quot;darkgreen&quot;,fill=&quot;green&quot;)</code></pre>

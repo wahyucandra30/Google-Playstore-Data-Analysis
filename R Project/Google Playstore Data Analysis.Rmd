@@ -38,14 +38,11 @@ Ditambah 3 kolom yang tidak kami gunakan
 
 ### Tujuan analisis
 Melihat banyaknya aplikasi yang ada di Google Playstore, kami ingin mengeksplorasi
-faktor-faktor yang memengaruhi popularitas aplikasi dari segi rating,
-Kemudian melakukan prediksi apakah aplikasi akan mendapatkan rating yang baik.
+faktor-faktor yang memiliki pengaruh paling besar bagi popularitas suatu aplikasi dari segi jumlah installasi menggunakan machine learning.
 
 # Persiapan R
 ### Import libraries
 ```{r message=FALSE, warning=FALSE}
-library(datasets)
-library(DT)
 library(dplyr)
 library(tidyr)
 library(factoextra)
@@ -62,8 +59,9 @@ df <- data.frame(gpData[1:10])
 ```
 
 <center>*Data frame diatas tidak meliputi 3 kolom terakhir karena kami rasa tidak relevan.*<br><br></center>
-Data kemudian dapat kita tampilkan dalam bentuk tabel. Di sini kami menggunakan datatable dari library DT agar tabel terlihat lebih rapi. Berikut tampilan sekilas beberapa baris data tersebut:
+Untuk selanjutnya akan terus menggunakan data frame. Data kemudian dapat kita tampilkan dalam bentuk tabel. Di sini kami menggunakan datatable dari library DT agar tabel terlihat lebih rapi. Berikut tampilan sekilas beberapa baris data tersebut:
 ```{r}
+library(DT)
 datatable(head(df), options = list(autoWidth=TRUE, scrollX=300, searching=FALSE, paging=FALSE, info=FALSE))
 ```
 
@@ -72,9 +70,42 @@ Dari data tersebut dapat kita lihat ringkasan kolom-kolom seperti berikut:
 summary(df)
 ```
 
+# Preprocessing
+Pada kolom rating terdapat **1474** data yang hilang/kosong. Data kosong seperti ini dapat memengaruhi akurasi model sehingga kami memutuskan untuk menghapus baris yang mengandung data kosong.
+
+```{r}
+df <- na.omit(df)
+summary(df)
+```
+
+Bagaimana indikasi suatu aplikasi diaggap populer berdasarkan jumlah installasi? Kami menyetujui bahwa aplikasi dengan jumlah installasi di atas **50.000** dapat dianggap populer. Dengan demikian, data installasi akan kami transformasi menjadi bersifat biner; antara populer(di atas 50.000 instalasi) dan tidak populer(di bawah 50.000 instalasi) dengan 1 merepresentasikan populer dan 0 merepresentasikan tidak populer. Berikut tampilan setiap nilai unik pada kolom installs:
+
+```{r}
+unique(df$Installs)
+```
+
+Untuk memulai proses binerisasi kolom installs, perlu dilakukan konversi data installs dari char ke numerik. Pertama, kami hapus tanda **+** dan **,** untuk memudahkan konversi ke numerik.
+```{r}
+df[c("Installs")] <- gsub('[+, ,]','',df$Installs)
+unique(df$Installs)
+```
+
+```{r}
+#df[c("Installs")] <- as.numeric(df[c("Installs")])
+#df[c("Installs")] <- ifelse(df[c("Installs")] > 50000, 1, 0)
+```
+
+```{r}
+#set.seed(666) # Menyimpan seed agar sample dapat dibuat ulang.
+# Now Selecting 75% of data as sample from total 'n' rows of the data  
+#sample <- sample.int(n = nrow(data), size = floor(.75*nrow(data)), replace = F)
+#train <- data[sample, ]
+#test  <- data[-sample, ]
+```
 ### Visualisasi data
 Di sini kami memvisualisasikan sebaran data rating aplikasi dengan menggunakan histogram dan density curve dari library ggplot2.
 ```{r message=FALSE, warning=FALSE}
+library(ggplot2)
 ggplot(df, aes(x = Rating)) +
   geom_histogram(aes(y = ..density..),
                  binwidth = .5, colour = "white ", fill="lightblue") +
