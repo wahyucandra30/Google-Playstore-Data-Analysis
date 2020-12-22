@@ -8,6 +8,7 @@ output: html_document
 # Analisis Data Google Playstore
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+options(scipen=999)
 ```
 
 
@@ -36,18 +37,18 @@ Ditambah 3 kolom yang tidak kami gunakan
 * **Current Ver**: Versi aplikasi
 * **Android ver**: Versi android
 
-### Tujuan analisis
-Melihat banyaknya aplikasi yang ada di Google Playstore, kami ingin mengeksplorasi
-faktor-faktor yang memiliki pengaruh paling besar bagi popularitas suatu aplikasi dari segi jumlah installasi menggunakan machine learning.
+### Tujuan
+Melihat banyaknya aplikasi yang ada di Google Playstore, kami ingin memodelkan suatu prediksi untuk menentukan popularitas aplikasi berdasarkan jumlah installasi menggunakan machine learning dengan algoritma klasifikasi **Naive Bayes**.
 
 # Persiapan R
 ### Import libraries
 ```{r message=FALSE, warning=FALSE}
-library(tidyr)
-library(factoextra)
-library(NbClust)
-library(fpc)
-library(dbscan)
+library(DT) #Untuk menampilkan tabel yang lebih enak dipandang
+library(plyr) #Untuk membantu mempelajari data
+library(dplyr) #Untuk membantu memanipulasi data
+library(psych) #Untuk menampilkan koefisian korelasi
+library(ggplot2) #Untuk membantu visualisasi data dengan plot
+library(naivebayes) #Untuk algoritma Naive bayes
 ```
 
 # Gambaran umum dataset
@@ -58,13 +59,12 @@ df <- data.frame(gpData[1:10])
 ```
 
 <center>*Data frame diatas tidak meliputi 3 kolom terakhir karena kami rasa tidak relevan.*<br><br></center>
-Untuk selanjutnya akan terus menggunakan data frame. Data kemudian dapat kita tampilkan dalam bentuk tabel. Di sini kami menggunakan datatable dari library DT agar tabel terlihat lebih rapi. Berikut tampilan sekilas beberapa baris data tersebut:
+Untuk selanjutnya akan terus menggunakan data frame. Data kemudian dapat Kami tampilkan dalam bentuk tabel. Di sini kami menggunakan datatable dari library DT agar tabel terlihat lebih rapi. Berikut tampilan sekilas beberapa baris data tersebut:
 ```{r}
-library(DT)
 datatable(head(df), options = list(autoWidth=TRUE, scrollX=300, searching=FALSE, paging=FALSE, info=FALSE))
 ```
 
-Dari data tersebut dapat kita lihat ringkasan kolom-kolom seperti berikut:
+Dari data tersebut dapat Kami lihat ringkasan kolom-kolom seperti berikut:
 ```{r}
 summary(df)
 ```
@@ -85,7 +85,6 @@ unique(df$Installs)
 
 Kami lakukan proses ini di kolom baru bernama **Popularity**. Berikut proses duplikasi kolom **Installs** ke kolom **popularity** menggunakan fungsi **mutate** pada **dplyr**:
 ```{r message=FALSE, warning=FALSE}
-library(dplyr)
 df <- df %>% mutate(Popularity = Installs)
 ```
 
@@ -96,18 +95,168 @@ df[c("Popularity")] <- gsub('[+, ,]','',df$Popularity)
 unique(df$Popularity)
 ```
 
-Lalu menggunakan fungsi **ifelse** untuk merubah data menjadi **Popular** jika data awal lebih dari atau sama dengan **100.000**, dan **Not Popular** jika tidak.
+Lalu menggunakan fungsi **ifelse** untuk merubah data menjadi **1** jika data awal lebih dari atau sama dengan **100.000**, dan **0** jika tidak.
 ```{r}
 df[c("Popularity")] <- ifelse(as.numeric(df$Popularity) >= as.numeric(100000), "Popular", "Not Popular")
-datatable(df[c("Installs", "Popularity")], options = list(searching=FALSE, info=FALSE))
+datatable(unique(cbind(df$Installs, df$Popularity)), colnames=c("Installs", "Popularity"),options = list(searching=FALSE, info=FALSE, paging=FALSE))
 ```
 
+Selanjutnya, kami lakukan hapus juga tanda tanda **+** dan **,** pada kolom **Installs**
+```{r}
+df[c("Installs")] <- gsub('[+, ,]','',df$Installs)
+unique(df$Installs)
+```
+
+Pada kolom **Price**, kami hapus tanda **$** 
+```{r}
+df[c("Price")] <- gsub('[$]','',df$Price)
+unique(df$Price)
+```
+Kami juga menerapkan proses binarisasi terhadap kolom Size, di mana aplikasi yang berukuran di atas **80.000 KB** dianggap **Large** dan di bawahnya dianggap **Small**.
+```{r}
+df[c("Size")] <- ifelse(df$Size >= as.numeric(80000), "Large", "Small")
+```
+
+Selanjutnya, kami melakukan pembelajaran data
+```{r}
+str(df)
+```
+
+Kami mengkoreksi tipe-tipe variabel:
+```{r}
+df$Category <- as.factor(df$Category)
+df$Rating <- as.numeric(df$Rating)
+df$Reviews <- as.numeric(df$Reviews)
+df$Size <- as.factor(df$Size)
+df$Installs <- as.numeric(df$Installs)
+df$Type <- as.factor(df$Type)
+df$Price <- as.numeric(df$Price)
+df$Content.Rating <- as.factor(df$Content.Rating)
+df$Genres <- as.factor(df$Genres)
+df$Popularity <- as.factor(df$Popularity)
+str(df)
+```
 
 ### Visualisasi data
-Di sini kami memvisualisasikan data poularitas aplikasi pada setiap kategori unik dengan menggunakan bar plot.
-```{r message=FALSE, warning=FALSE}
+Untuk mengembangkan model klasifikasi Naive Bayes, Kami perlu memastikan variabel-variabel independen tidak memiliki korelasi yang tinggi. Untuk kolom App tidak kami ikutkan. Di sini kami menggunakan library(psych).
 
-#Plot x nya nama Category y nya jumlah yg "Populer" dari kolom Popularity
+```{r}
+pairs.panels(df[c("Category","Rating","Reviews", "Size", "Content.Rating", "Type", "Price", "Content.Rating", "Genres")])
+```
+
+Secara sekilas dapat dilihat bahwa variabel-variabel tersebut memiliki korelasi yang cenderung rendah.
+
+Selanjutnya kami visualisasikan frekuensi popularitas menggunakan bar plot:
+```{r}
+ggplot(df, aes(x=Popularity, fill=Popularity)) +
+  geom_bar(color="black",) +
+  ylab("Frequency")
+```
+
+Terlihat lebih banyak aplikasi yang populer dari pada yang tidak populer.
+
+# Partisi Data
+Kami akan mempartisi data menjadi training set dan testing set dengan porsi **80%** training dan **20%** testing. Dengan memberi lebih banyak data untuk melatih model diharapkan dapat meningkatkan akurasi dan menghindari underfitting atau overfitting.
+
+Berikut proses partisi data:
+```{r}
+set.seed(2020) #Menetapkan seed agar dapat digunakan kembali
+sampling <- sample(2, nrow(df), replace = TRUE, prob = c(0.8, 0.2))
+
+trainSet <- df[sampling == 1,]
+testSet <- df[sampling == 2,]
+
+datatable(cbind(nrow(trainSet), nrow(testSet)),colnames=c("Training Set","Testing Set"), options = list(searching=FALSE, info=FALSE, paging=FALSE))
+
+```
+
+# Pemodelan Naive Bayes
+Kami memasukkan data pada **Training Set** dan **Testing Set** ke model naive bayes. Ternyata terdapat **zero-probabilities**. Hal ini dapat diatasi dengan menggunakan **Laplace Smoothing**. Kami juga menggunakan **Kernel Density Estimation** untuk mengurangi tingkat misklasifikasi.
+
+### Training:
+```{r}
+trainModel <- naive_bayes(Popularity ~ ., data = c(trainSet[2:5], trainSet[7:11]), laplace = 1, usekernel = TRUE)
+trainModel
+```
+
+Berikut tampilan keseluruhan tabelnya:
+```{r}
+tables(trainModel, which = NULL)
 ```
 
 
+### Testing:
+```{r}
+testModel <- naive_bayes(Popularity ~ ., data = c(testSet[2:5], testSet[7:11]), laplace = 1, usekernel = TRUE)
+testModel
+```
+
+Berikut tampilan keseluruhan tabelnya:
+```{r}
+tables(testModel, which = NULL)
+```
+
+# Prediksi
+Misal kami ingin memprediksi suatu aplikasi dengan keterangan sebagai berikut:
+* Category: Tools
+* Rating: 4.1
+* Reviews: 200
+* Size: Small
+* Type: Free
+* Price: 0
+* Content.Rating: Everyone
+* Genres: Shopping
+```{r}
+inputSet <- data.frame(Category = "Tools", Rating = 4.1, Reviews = 200, Size = "Small", Type = "Free", Price = 0, Content.Rating = "Everyone", Genres ="Shopping")
+
+```
+
+```{r message=FALSE, warning=FALSE}
+options(scipen=0) #Mengaktifkan notasi ilmiah
+names(inputSet) <- names(trainModel) #Memastikan kesamaan nama kolom
+trainPrediction <- predict(trainModel, inputSet, type="prob")
+trainPrediction
+```
+Aplikasi yang kami inputkan memiliki probabilitas **65%** menjadi populer dan **34%** tidak populer.
+
+Kami lakukan juga prediksi pada model testing.
+
+```{r message=FALSE, warning=FALSE}
+names(inputSet) <- names(testModel) #Memastikan kesamaan nama kolom
+testPrediction <- predict(testModel, inputSet, type="prob")
+testPrediction
+```
+Kali ini probabilitas populer **64%** dan tidak populer **35%**.
+
+# Confusion Matrix
+Untuk mengecek akurasi, kami menggunakan **Confusion Matrix**.
+```{r message=FALSE, warning=FALSE}
+trainPrediction1 <- predict(trainModel, trainSet)
+trainConfusionMatrix <- table(trainPrediction1, trainSet$Popularity)
+trainConfusionMatrix
+```
+Dapat dilihat pada confusion matrix di atas bahwa model berhasil memprediksi **2543** aplikasi yang tidak populer dan **4344** aplikasi populer dengan benar. Dengan menggunakan confusion matrix di atas kita dapat menghitung akurasi dengan membagi sum diagonal dengan sum keseluruhan.
+```{r}
+trainAccuracy <- sum(diag(trainConfusionMatrix)) / sum(trainConfusionMatrix)
+trainAccuracy
+```
+Didapat akurasi training **91%**.
+
+Lakukan cara serupa untuk menghitung akurasi testing.
+```{r message=FALSE, warning=FALSE}
+testPrediction1 <- predict(testModel, testSet)
+testConfusionMatrix <- table(testPrediction1, testSet$Popularity)
+testConfusionMatrix
+```
+Berhasil memprediksi **578** tidak populer dan **1114** populer dengan benar.
+
+```{r}
+testAccuracy <- sum(diag(testConfusionMatrix)) / sum(testConfusionMatrix)
+testAccuracy
+```
+Didapat akurasi testing **92%**
+
+Tidak ditemukan indikasi overfitting atau underfitting, serta prediksi yang dikeluarkan masuk akal.
+
+# Kesimpulan
+Dari model yang telah kami kembangkan, dapat disimpulkan bahwa aplikasi yang memiliki kemungkinan menjadi populer terbesar yaitu yang berada dalam kategori **Family** dengan kurang lebih **92% ** kepastian aplikasi tersebut akan mendapat jumlah installasi lebih dari 100.000.
