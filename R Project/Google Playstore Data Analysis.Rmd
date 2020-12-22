@@ -96,21 +96,18 @@ df[c("Popularity")] <- gsub('[+, ,]','',df$Popularity)
 unique(df$Popularity)
 ```
 
-Lalu menggunakan fungsi **ifelse** untuk merubah data menjadi **1** jika data awal lebih dari atau sama dengan **50.000**, dan **0** jika tidak.
+Lalu menggunakan fungsi **ifelse** untuk merubah data menjadi **Popular** jika data awal lebih dari atau sama dengan **100.000**, dan **Not Popular** jika tidak.
 ```{r}
-df[c("Popularity")] <- ifelse(as.numeric(df$Popularity) >= as.numeric(50000), 1, 0)
+df[c("Popularity")] <- ifelse(as.numeric(df$Popularity) >= as.numeric(100000), "Popular", "Not Popular")
 datatable(df[c("Installs", "Popularity")], options = list(searching=FALSE, info=FALSE))
 ```
 
 
 ### Visualisasi data
-Di sini kami memvisualisasikan sebaran data rating aplikasi dengan menggunakan histogram dan density curve dari library ggplot2.
+Di sini kami memvisualisasikan data poularitas aplikasi pada setiap kategori unik dengan menggunakan bar plot.
 ```{r message=FALSE, warning=FALSE}
-library(ggplot2)
-ggplot(df, aes(x = Rating)) +
-  geom_histogram(aes(y = ..density..),
-                 binwidth = .5, colour = "white ", fill="lightblue") +
-  geom_density(alpha = .1, colour = "darkgreen",fill="green")
+
+#Plot x nya nama Category y nya jumlah yg "Populer" dari kolom Popularity
 ```
 
-Terlihat sebaran data condong ke kiri dengan konsentrasi sebaran terpadat di tengah yang berarti lebih sedikit jumlah rating buruk.
+
