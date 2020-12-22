@@ -18,7 +18,7 @@ options(scipen=999)
 Dataset yang digunakan diambil dari: https://www.kaggle.com/ujjwalprakash/playstore
 
 Dataset tersebut berisi daftar aplikasi pada Google Playstore beserta rinciannya.
-Terdapat total **10.841 baris** dan **13 kolom**.
+Terdapat total **10.840 baris** dan **13 kolom**.
 
 Kolom-kolom pada dataset meliputi:
 
@@ -198,6 +198,7 @@ tables(testModel, which = NULL)
 
 # Prediksi
 Misal kami ingin memprediksi suatu aplikasi dengan keterangan sebagai berikut:
+
 * Category: Tools
 * Rating: 4.1
 * Reviews: 200

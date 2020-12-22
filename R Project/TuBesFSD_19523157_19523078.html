@@ -2934,7 +2934,7 @@ summary {
 <div id="data-yang-digunakan" class="section level3">
 <h3>Data yang digunakan</h3>
 <p>Dataset yang digunakan diambil dari: <a href="https://www.kaggle.com/ujjwalprakash/playstore" class="uri">https://www.kaggle.com/ujjwalprakash/playstore</a></p>
-<p>Dataset tersebut berisi daftar aplikasi pada Google Playstore beserta rinciannya. Terdapat total <strong>10.841 baris</strong> dan <strong>13 kolom</strong>.</p>
+<p>Dataset tersebut berisi daftar aplikasi pada Google Playstore beserta rinciannya. Terdapat total <strong>10.840 baris</strong> dan <strong>13 kolom</strong>.</p>
 <p>Kolom-kolom pada dataset meliputi:</p>
 <ul>
 <li><strong>App</strong>: Nama aplikasi</li>
@@ -2980,8 +2980,8 @@ df &lt;- data.frame(gpData[1:10])</code></pre>
 </center>
 <p>Untuk selanjutnya akan terus menggunakan data frame. Data kemudian dapat Kami tampilkan dalam bentuk tabel. Di sini kami menggunakan datatable dari library DT agar tabel terlihat lebih rapi. Berikut tampilan sekilas beberapa baris data tersebut:</p>
 <pre class="r"><code>datatable(head(df), options = list(autoWidth=TRUE, scrollX=300, searching=FALSE, paging=FALSE, info=FALSE))</code></pre>
-<div id="htmlwidget-9e2da56f8d53b4d79e07" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-9e2da56f8d53b4d79e07">{"x":{"filter":"none","data":[["1","2","3","4","5","6"],["Photo Editor &amp; Candy Camera &amp; Grid &amp; ScrapBook","Coloring book moana","U Launcher Lite â€“ FREE Live Cool Themes, Hide Apps","Sketch - Draw &amp; Paint","Pixel Draw - Number Art Coloring Book","Paper flowers instructions"],["ART_AND_DESIGN","ART_AND_DESIGN","ART_AND_DESIGN","ART_AND_DESIGN","ART_AND_DESIGN","ART_AND_DESIGN"],[4.1,3.9,4.7,4.5,4.3,4.4],[159,967,87510,215644,967,167],[19000,14000,8700,25000,2800,5600],["10,000+","500,000+","5,000,000+","50,000,000+","100,000+","50,000+"],["Free","Free","Free","Free","Free","Free"],["0","0","0","0","0","0"],["Everyone","Everyone","Everyone","Teen","Everyone","Everyone"],["Art &amp; Design","Art &amp; Design;Pretend Play","Art &amp; Design","Art &amp; Design","Art &amp; Design;Creativity","Art &amp; Design"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>App<\/th>\n      <th>Category<\/th>\n      <th>Rating<\/th>\n      <th>Reviews<\/th>\n      <th>Size<\/th>\n      <th>Installs<\/th>\n      <th>Type<\/th>\n      <th>Price<\/th>\n      <th>Content.Rating<\/th>\n      <th>Genres<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"autoWidth":true,"scrollX":300,"searching":false,"paging":false,"info":false,"columnDefs":[{"className":"dt-right","targets":[3,4,5]},{"orderable":false,"targets":0}],"order":[],"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-ef03bf64dc3c434dcd15" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-ef03bf64dc3c434dcd15">{"x":{"filter":"none","data":[["1","2","3","4","5","6"],["Photo Editor &amp; Candy Camera &amp; Grid &amp; ScrapBook","Coloring book moana","U Launcher Lite â€“ FREE Live Cool Themes, Hide Apps","Sketch - Draw &amp; Paint","Pixel Draw - Number Art Coloring Book","Paper flowers instructions"],["ART_AND_DESIGN","ART_AND_DESIGN","ART_AND_DESIGN","ART_AND_DESIGN","ART_AND_DESIGN","ART_AND_DESIGN"],[4.1,3.9,4.7,4.5,4.3,4.4],[159,967,87510,215644,967,167],[19000,14000,8700,25000,2800,5600],["10,000+","500,000+","5,000,000+","50,000,000+","100,000+","50,000+"],["Free","Free","Free","Free","Free","Free"],["0","0","0","0","0","0"],["Everyone","Everyone","Everyone","Teen","Everyone","Everyone"],["Art &amp; Design","Art &amp; Design;Pretend Play","Art &amp; Design","Art &amp; Design","Art &amp; Design;Creativity","Art &amp; Design"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>App<\/th>\n      <th>Category<\/th>\n      <th>Rating<\/th>\n      <th>Reviews<\/th>\n      <th>Size<\/th>\n      <th>Installs<\/th>\n      <th>Type<\/th>\n      <th>Price<\/th>\n      <th>Content.Rating<\/th>\n      <th>Genres<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"autoWidth":true,"scrollX":300,"searching":false,"paging":false,"info":false,"columnDefs":[{"className":"dt-right","targets":[3,4,5]},{"orderable":false,"targets":0}],"order":[],"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <p>Dari data tersebut dapat Kami lihat ringkasan kolom-kolom seperti berikut:</p>
 <pre class="r"><code>summary(df)</code></pre>
 <pre><code>##      App              Category             Rating         Reviews        
@@ -3054,8 +3054,8 @@ unique(df$Popularity)</code></pre>
 <p>Lalu menggunakan fungsi <strong>ifelse</strong> untuk merubah data menjadi <strong>1</strong> jika data awal lebih dari atau sama dengan <strong>100.000</strong>, dan <strong>0</strong> jika tidak.</p>
 <pre class="r"><code>df[c(&quot;Popularity&quot;)] &lt;- ifelse(as.numeric(df$Popularity) &gt;= as.numeric(100000), &quot;Popular&quot;, &quot;Not Popular&quot;)
 datatable(unique(cbind(df$Installs, df$Popularity)), colnames=c(&quot;Installs&quot;, &quot;Popularity&quot;),options = list(searching=FALSE, info=FALSE, paging=FALSE))</code></pre>
-<div id="htmlwidget-03dc859954d638e968c9" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-03dc859954d638e968c9">{"x":{"filter":"none","data":[["10,000+","500,000+","5,000,000+","50,000,000+","100,000+","50,000+","1,000,000+","10,000,000+","5,000+","100,000,000+","1,000,000,000+","1,000+","500,000,000+","100+","500+","10+","5+","50+","1+"],["Not Popular","Popular","Popular","Popular","Popular","Not Popular","Popular","Popular","Not Popular","Popular","Popular","Not Popular","Popular","Not Popular","Not Popular","Not Popular","Not Popular","Not Popular","Not Popular"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Installs<\/th>\n      <th>Popularity<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"searching":false,"info":false,"paging":false,"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-c3c98b07cb883f4ca208" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-c3c98b07cb883f4ca208">{"x":{"filter":"none","data":[["10,000+","500,000+","5,000,000+","50,000,000+","100,000+","50,000+","1,000,000+","10,000,000+","5,000+","100,000,000+","1,000,000,000+","1,000+","500,000,000+","100+","500+","10+","5+","50+","1+"],["Not Popular","Popular","Popular","Popular","Popular","Not Popular","Popular","Popular","Not Popular","Popular","Popular","Not Popular","Popular","Not Popular","Not Popular","Not Popular","Not Popular","Not Popular","Not Popular"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Installs<\/th>\n      <th>Popularity<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"searching":false,"info":false,"paging":false,"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <p>Selanjutnya, kami lakukan hapus juga tanda tanda <strong>+</strong> dan <strong>,</strong> pada kolom <strong>Installs</strong></p>
 <pre class="r"><code>df[c(&quot;Installs&quot;)] &lt;- gsub(&#39;[+, ,]&#39;,&#39;&#39;,df$Installs)
 unique(df$Installs)</code></pre>
@@ -3145,8 +3145,8 @@ trainSet &lt;- df[sampling == 1,]
 testSet &lt;- df[sampling == 2,]
 
 datatable(cbind(nrow(trainSet), nrow(testSet)),colnames=c(&quot;Training Set&quot;,&quot;Testing Set&quot;), options = list(searching=FALSE, info=FALSE, paging=FALSE))</code></pre>
-<div id="htmlwidget-e836a3b9a0d320109c2b" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-e836a3b9a0d320109c2b">{"x":{"filter":"none","data":[[7542],[1824]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Training Set<\/th>\n      <th>Testing Set<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"searching":false,"info":false,"paging":false,"columnDefs":[{"className":"dt-right","targets":[0,1]}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-ece92608bcc4ad4369ac" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-ece92608bcc4ad4369ac">{"x":{"filter":"none","data":[[7542],[1824]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Training Set<\/th>\n      <th>Testing Set<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"searching":false,"info":false,"paging":false,"columnDefs":[{"className":"dt-right","targets":[0,1]}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 </div>
 <div id="pemodelan-naive-bayes" class="section level1">
 <h1>Pemodelan Naive Bayes</h1>
@@ -4052,7 +4052,17 @@ testModel</code></pre>
 </div>
 <div id="prediksi" class="section level1">
 <h1>Prediksi</h1>
-<p>Misal kami ingin memprediksi suatu aplikasi dengan keterangan sebagai berikut: * Category: Tools * Rating: 4.1 * Reviews: 200 * Size: Small * Type: Free * Price: 0 * Content.Rating: Everyone * Genres: Shopping</p>
+<p>Misal kami ingin memprediksi suatu aplikasi dengan keterangan sebagai berikut:</p>
+<ul>
+<li>Category: Tools</li>
+<li>Rating: 4.1</li>
+<li>Reviews: 200</li>
+<li>Size: Small</li>
+<li>Type: Free</li>
+<li>Price: 0</li>
+<li>Content.Rating: Everyone</li>
+<li>Genres: Shopping</li>
+</ul>
 <pre class="r"><code>inputSet &lt;- data.frame(Category = &quot;Tools&quot;, Rating = 4.1, Reviews = 200, Size = &quot;Small&quot;, Type = &quot;Free&quot;, Price = 0, Content.Rating = &quot;Everyone&quot;, Genres =&quot;Shopping&quot;)</code></pre>
 <pre class="r"><code>options(scipen=0) #Mengaktifkan notasi ilmiah
 names(inputSet) &lt;- names(trainModel) #Memastikan kesamaan nama kolom
